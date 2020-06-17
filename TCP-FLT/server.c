@@ -1,7 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-// librarii pentru time function, sockets, htons, file stat
+// biblioteci pentru time function, sockets, htons, file stat
 #include <sys/time.h>
 #include <time.h>
 #include <sys/socket.h>
@@ -10,7 +10,7 @@
 #include <sys/uio.h>
 #include <sys/stat.h>
 
-// librarii pentru file function and bzero
+// biblioteci pentru file function and bzero
 #include <fcntl.h>
 #include <unistd.h>
 #include <strings.h>
