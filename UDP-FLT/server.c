@@ -1,16 +1,8 @@
-/*
- * File : server.c
- * Author : Amine Amanzou
- *
- * Created : 4th January 2013
- *
- * Under GNU Licence
- */
 
 #include <stdio.h>
 #include <stdlib.h>
 
-// Time function, sockets, htons... file stat
+// librarii pentru time function, sockets, htons, file stat
 #include <sys/time.h>
 #include <time.h>
 #include <sys/socket.h>
@@ -19,41 +11,35 @@
 #include <sys/uio.h>
 #include <sys/stat.h>
 
-// File function and bzero
+// librarii pentru file function and bzero
 #include <fcntl.h>
 #include <unistd.h>
 #include <strings.h>
-
-/* Taille du buffer utilise pour envoyer le fichier
- * en plusieurs blocs
- */
+// dimensiunea bufferului folosit pentru a trimite fis (in mai multe blocuri)
 #define BUFFERT 512
 
-/* Commande pou génerer un fichier de test
- * dd if=/dev/urandom of=fichier count=8
- */
 
-/* Declaration des fonctions*/
+// declaratiile functiilor
 int duration (struct timeval *start,struct timeval *stop, struct timeval *delta);
 int create_server_socket (int port);
 
 struct sockaddr_in sock_serv,clt;
 
 int main (int argc, char**argv){
-    //Descripteur
+    //file descriptor si socket file descriptor
 	int fd, sfd;
     
 	char buf[BUFFERT];
-	off_t count=0, n; // long type
+	off_t count=0, n; // long 
 	char filename[256];
     unsigned int l=sizeof(struct sockaddr_in);
 	
-    // Variable pour la date
+    // variabila pt data
 	time_t intps;
 	struct tm* tmi;
     
 	if (argc != 2){
-		printf("Error usage : %s <port_serv>\n",argv[0]);
+		printf("eroare la utilizare : %s <port_serv>\n",argv[0]);
 		return EXIT_FAILURE;
 	}
     
@@ -63,21 +49,21 @@ int main (int argc, char**argv){
 	tmi = localtime(&intps);
 	bzero(filename,256);
 	sprintf(filename,"clt.%d.%d.%d.%d.%d.%d",tmi->tm_mday,tmi->tm_mon+1,1900+tmi->tm_year,tmi->tm_hour,tmi->tm_min,tmi->tm_sec);
-	printf("Creating the output file : %s\n",filename);
+	printf("Crearea fisierului output: %s\n",filename);
     
-	//ouverture du fichier
+	//deschiderea fisierului
 	if((fd=open(filename,O_CREAT|O_WRONLY|O_TRUNC,0600))==-1){
-		perror("open fail");
+		perror("Eroare la deschidere");
 		return EXIT_FAILURE;
 	}
     
-	//preparation de l'envoie
+	//pregatirea trimiterii
 	bzero(&buf,BUFFERT);
     n=recvfrom(sfd,&buf,BUFFERT,0,(struct sockaddr *)&clt,&l);
 	while(n){
-		printf("%lld of data received \n",n);
+		printf("%lld de date primite \n",n);
 		if(n==-1){
-			perror("read fails");
+			perror("Eroare la citire");
 			return EXIT_FAILURE;
 		}
 		count+=n;
@@ -86,14 +72,14 @@ int main (int argc, char**argv){
         n=recvfrom(sfd,&buf,BUFFERT,0,(struct sockaddr *)&clt,&l);
 	}
     
-	printf("Nombre d'octets transférés : %lld \n",count);
+	printf("Numarul de octeti transferati: %lld \n",count);
     
     close(sfd);
     close(fd);
 	return EXIT_SUCCESS;
 }
 
-/* Fonction permettant le calcul de la durée de l'envoie */
+// functie pentru calcularea duratei trimiterii
 int duration (struct timeval *start,struct timeval *stop,struct timeval *delta)
 {
     suseconds_t microstart, microstop, microdelta;
@@ -111,9 +97,9 @@ int duration (struct timeval *start,struct timeval *stop,struct timeval *delta)
         return 0;
 }
 
-/* Fonction permettant la creation d'un socket et son attachement au systeme
- * Renvoie un descripteur de fichier dans la table de descripteur du processus
- * bind permet sa definition aupres du systeme
+/* Functia care permite crearea unui socket si atasarea acestuia la sistem
+ * Returneaza un descriptor de fisier in tabelul descriptorului de proces
+ * bind permite definirea sa cu sistemul
  */
 int create_server_socket (int port){
     int l;
@@ -121,11 +107,11 @@ int create_server_socket (int port){
     
 	sfd = socket(AF_INET,SOCK_DGRAM,0);
 	if (sfd == -1){
-        perror("socket fail");
+        perror("Eroare socket");
         return EXIT_FAILURE;
 	}
     
-    //preparation de l'adresse de la socket destination
+    //pregatirea adresei socket-ului de destinatie
 	l=sizeof(struct sockaddr_in);
 	bzero(&sock_serv,l);
 	
@@ -133,9 +119,9 @@ int create_server_socket (int port){
 	sock_serv.sin_port=htons(port);
 	sock_serv.sin_addr.s_addr=htonl(INADDR_ANY);
     
-	//Affecter une identité au socket
+	//alocarea unei identitati socket-ului
 	if(bind(sfd,(struct sockaddr*)&sock_serv,l)==-1){
-		perror("bind fail");
+		perror("Eroare bind");
 		return EXIT_FAILURE;
 	}
     
