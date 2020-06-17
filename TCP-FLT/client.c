@@ -63,8 +63,12 @@ int main (int argc, char**argv){
     Py_Initialize();
     PySys_SetArgv(argc, argv);
 	file = fopen(filename, "r");
-    PyRun_SimpleFile(file, "p.py");
-    Py_Finalize();
+    if(PyRun_SimpleFile(file, "p.py")){
+    	exit(1);
+    }
+    else{
+    	Py_Finalize();
+    }
 
 	if ((fd = open(argv[3],O_RDONLY))==-1){
 		perror("eroare de deschidere");
