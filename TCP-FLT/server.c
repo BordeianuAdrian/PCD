@@ -56,7 +56,7 @@ int main(int argc,char** argv){
 	struct tm* tmi;
     
     if(argc!=2) {
-        perror("utilisation ./a.out <num_port> <file2send>\n");
+        perror("utilisation ./a.out <num_port>\n");
         exit(3);
     }
     

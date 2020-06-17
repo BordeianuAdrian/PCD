@@ -48,12 +48,27 @@ int main (int argc, char**argv){
 	struct stat buffer;
     
 	if (argc != 4){
-		printf("Error usage : %s <ip_serv> <port_serv> <filename>\n",argv[0]);
+		printf("Error usage : %s <ip_serv> <port_serv> <filename> \n",argv[0]);
 		return EXIT_FAILURE;
 	}
     
     sfd=create_client_socket(atoi(argv[2]), argv[1]);
     
+    char filename[] = "p.py";
+    FILE* file;
+    //char* process_image = malloc(sizeof(argv[3]) + sizeof("_modified.jpg"));
+
+
+
+
+
+    Py_SetProgramName(argv[0]);
+    Py_Initialize();
+    PySys_SetArgv(argc, argv);
+	file = fopen(filename, "r");
+    PyRun_SimpleFile(file, "p.py");
+    Py_Finalize();
+
 	if ((fd = open(argv[3],O_RDONLY))==-1){
 		perror("open fail");
 		return EXIT_FAILURE;
