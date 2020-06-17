@@ -8,7 +8,8 @@
  */
 
 #include <stdio.h>
-#include <Python.h>
+#include </usr/include/python2.7/Python.h>
+
 #include <stdlib.h>
 
 // Time function, sockets, htons... file stat
@@ -48,7 +49,7 @@ int main (int argc, char**argv){
     int l=sizeof(struct sockaddr_in);
 	struct stat buffer;
     
-	if (argc != 4){
+	if (argc < 2){
 		printf("Error usage : %s <ip_serv> <port_serv> <filename> \n",argv[0]);
 		return EXIT_FAILURE;
 	}
