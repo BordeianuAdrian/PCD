@@ -1,16 +1,14 @@
 /*
  * File : client.c
- * Author : Amine Amanzou
+ * Autori: Teodor Branescu, Iulian Cimpan, Adrian Bordeianu, Petri Bogdan, Sebastian Carabasiu
  *
- * Created : 4th January 2013
- *
- * Under GNU Licence
+ * Creat : 17 Iunie 2020
  */
 
 #include <stdio.h>
 #include <stdlib.h>
 
-// Time function, sockets, htons... file stat
+// Functii de timp socket-uri etc.
 #include <sys/time.h>
 #include <sys/socket.h>
 #include <arpa/inet.h>
@@ -18,21 +16,18 @@
 #include <sys/uio.h>
 #include <sys/stat.h>
 
-// File function and bzero
+// Functii de fisiere
 #include <fcntl.h>
 #include <unistd.h>
 #include <strings.h>
 
-/* Taille du buffer utilise pour envoyer le fichier
- * en plusieurs blocs
+/* Dimensiunea buffer-ului folosit pentru a trimite fisierul
  */
+
 #define BUFFERT 512
 
-/* Commande pou génerer un fichier de test
- * dd if=/dev/urandom of=fichier count=8
- */
 
-/* Declaration des fonctions*/
+/* Declararea functiilor*/
 int duration (struct timeval *start,struct timeval *stop, struct timeval *delta);
 int create_client_socket (int port, char* ipaddr);
 
@@ -48,7 +43,7 @@ int main (int argc, char**argv){
 	struct stat buffer;
     
 	if (argc < 2){
-		printf("Error usage : %s <ip_serv> <port_serv> <filename>\n",argv[0]);
+		printf("Eroare de utilizare : %s <ip_serv> <port_serv> <filename>\n",argv[0]);
 		return EXIT_FAILURE;
 	}
     
@@ -66,31 +61,31 @@ int main (int argc, char**argv){
     Py_Finalize();
     
 	if ((fd = open(argv[3],O_RDONLY))==-1){
-		perror("open fail");
+		perror("eroare de deschidere");
 		return EXIT_FAILURE;
 	}
     
-	//taille du fichier
+	//dimensiunea fisierelor
 	if (stat(argv[3],&buffer)==-1){
-		perror("stat fail");
+		perror("stat esuare");
 		return EXIT_FAILURE;
 	}
 	else
 		sz=buffer.st_size;
     
-	//preparation de l'envoie
+	//pregatirea expedierii
 	bzero(&buf,BUFFERT);
     
 	gettimeofday(&start,NULL);
     n=read(fd,buf,BUFFERT);
 	while(n){
 		if(n==-1){
-			perror("read fails");
+			perror("esuare citire");
 			return EXIT_FAILURE;
 		}
 		m=sendto(sfd,buf,n,0,(struct sockaddr*)&sock_serv,l);
 		if(m==-1){
-			perror("send error");
+			perror("eroare trimitere");
 			return EXIT_FAILURE;
 		}
 		count+=m;
@@ -98,23 +93,23 @@ int main (int argc, char**argv){
 		bzero(buf,BUFFERT);
         n=read(fd,buf,BUFFERT);
 	}
-	//read vient de retourner 0 : fin de fichier
+	//cititul tocmai a returnat 0: sfârșitul fișierului
 	
-	//pour debloquer le serv
+	//pentru a debloca serv
 	m=sendto(sfd,buf,0,0,(struct sockaddr*)&sock_serv,l);
 	gettimeofday(&stop,NULL);
 	duration(&start,&stop,&delta);
     
-	printf("Nombre d'octets transférés : %lld\n",count);
-	printf("Sur une taille total de : %lld \n",sz);
-	printf("Pour une durée total de : %ld.%d \n",delta.tv_sec,delta.tv_usec);
+	printf("Numarul de octeti transferati : %lld\n",count);
+	printf("O marime totala de : %lld \n",sz);
+	printf("Cu o durata de : %ld.%d \n",delta.tv_sec,delta.tv_usec);
     
     close(sfd);
     close(fd);
 	return EXIT_SUCCESS;
 }
 
-/* Fonction permettant le calcul de la durée de l'envoie */
+/* Funcție care permite calcularea duratei trimiterii */
 int duration (struct timeval *start,struct timeval *stop,struct timeval *delta)
 {
     suseconds_t microstart, microstop, microdelta;
@@ -132,27 +127,29 @@ int duration (struct timeval *start,struct timeval *stop,struct timeval *delta)
         return 0;
 }
 
-/* Fonction permettant la creation d'un socket
- * Renvoie un descripteur de fichier
+/* 
+	Funcție care permite crearea unui socket
+  * Returnează un descriptor de fișier
  */
+
 int create_client_socket (int port, char* ipaddr){
     int l;
 	int sfd;
     
 	sfd = socket(AF_INET,SOCK_DGRAM,0);
 	if (sfd == -1){
-        perror("socket fail");
+        perror("socket esuat");
         return EXIT_FAILURE;
 	}
     
-    //preparation de l'adresse de la socket destination
+    //pregătirea adresei socket-ului  de destinație
 	l=sizeof(struct sockaddr_in);
 	bzero(&sock_serv,l);
 	
 	sock_serv.sin_family=AF_INET;
 	sock_serv.sin_port=htons(port);
     if (inet_pton(AF_INET,ipaddr,&sock_serv.sin_addr)==0){
-		printf("Invalid IP adress\n");
+		printf("Adresa IP invalida:\n");
 		return EXIT_FAILURE;
 	}
     
