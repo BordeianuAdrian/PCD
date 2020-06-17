@@ -1,16 +1,7 @@
-/*
- * File : server.c
- * Author : Amine Amanzou
- *
- * Created : 4th January 2013
- *
- * Under GNU Licence
- */
-
 #include <stdio.h>
 #include <stdlib.h>
 
-// Time function, sockets, htons... file stat
+// librarii pentru time function, sockets, htons, file stat
 #include <sys/time.h>
 #include <time.h>
 #include <sys/socket.h>
@@ -19,23 +10,18 @@
 #include <sys/uio.h>
 #include <sys/stat.h>
 
-// File function and bzero
+// librarii pentru file function and bzero
 #include <fcntl.h>
 #include <unistd.h>
 #include <strings.h>
 
-/* Taille du buffer utilise pour envoyer le fichier
- * en plusieurs blocs
- */
+// dimensiunea bufferului folosit pentru a trimite fis (in mai multe blocuri)
 #define BUFFERT 512
-/* Taille de la file d'attente des clients */
+
+// dimensiunea cozii de clienti
 #define BACKLOG 1
 
-/* Commande pou génerer un fichier de test
- * dd if=/dev/urandom of=fichier count=8
- */
-
-/* Declaration des fonctions*/
+// declaratiile functiilor
 int duration (struct timeval *start,struct timeval *stop, struct timeval *delta);
 int create_server_socket (int port);
 
@@ -51,12 +37,12 @@ int main(int argc,char** argv){
     char buffer[BUFFERT],filename[256];
     char dst[INET_ADDRSTRLEN];
     
-    // Variable pour la date
+    // variabila pt data
 	time_t intps;
 	struct tm* tmi;
     
     if(argc!=2) {
-        perror("utilisation ./a.out <num_port>\n");
+        perror("utilizare: ./a.out <num_port>\n");
         exit(3);
     }
     
@@ -65,31 +51,30 @@ int main(int argc,char** argv){
     bzero(buffer,BUFFERT);
     listen(sfd,BACKLOG);
     
-    //Fonction qui attent la fonction connecte du client
     nsid=accept(sfd,(struct sockaddr*)&sock_clt,&length);
     if(nsid==-1){
-        perror("accept fail");
+        perror("Accept esuat.");
         return EXIT_FAILURE;
     }
     else {
         if(inet_ntop(AF_INET,&sock_clt.sin_addr,dst,INET_ADDRSTRLEN)==NULL){
-            perror("erreur socket");
+            perror("Eroare la socket.");
             exit (4);
         }
         clt_port=ntohs(sock_clt.sin_port);
-        printf("Debut de la connection pour : %s:%d\n",dst,clt_port);
+        printf("Pornirea conexiunii pentru: %s:%d\n",dst,clt_port);
         
-        //Traitement du nom du fichier avec la date
+        //prelucrarea numelui fisierului output
         bzero(filename,256);
         intps = time(NULL);
         tmi = localtime(&intps);
         bzero(filename,256);
         sprintf(filename,"clt.%d.%d.%d.%d.%d.%d",tmi->tm_mday,tmi->tm_mon+1,1900+tmi->tm_year,tmi->tm_hour,tmi->tm_min,tmi->tm_sec);
-        printf("Creating the copied output file : %s\n",filename);
+        printf("Crearea fisierului output copiat: %s\n",filename);
         
         if ((fd=open(filename,O_CREAT|O_WRONLY,0600))==-1)
         {
-            perror("open fail");
+            perror("Deschiderea a esuat.");
             exit (3);
         }
         bzero(buffer,BUFFERT);
@@ -97,11 +82,11 @@ int main(int argc,char** argv){
         n=recv(nsid,buffer,BUFFERT,0);
         while(n) {
             if(n==-1){
-                perror("recv fail");
+                perror("recv a esuat.");
                 exit(5);
             }
             if((m=write(fd,buffer,n))==-1){
-                perror("write fail");
+                perror("scrierea a esuat.");
                 exit (6);
             }
             count=count+m;
@@ -113,15 +98,15 @@ int main(int argc,char** argv){
     }
     close(nsid);
     
-    printf("Fin de la transmission avec %s.%d\n",dst,clt_port);
-    printf("Nombre d'octets reçu : %ld \n",count);
+    printf("Sfarsitul transmisiei: %s.%d\n",dst,clt_port);
+    printf("Nr de octeti primiti: %ld \n",count);
     
     return EXIT_SUCCESS;
 }
 
-/* Fonction permettant la creation d'un socket et son attachement au systeme
- * Renvoie un descripteur de fichier dans la table de descripteur du processus
- * bind permet sa definition aupres du systeme
+/* Functia care permite crearea unui socket si atasarea acestuia la sistem
+ * Returneaza un descriptor de fisier in tabelul descriptorului de proces
+ * bind permite definirea sa cu sistemul
  */
 int create_server_socket (int port){
     int l;
@@ -130,21 +115,20 @@ int create_server_socket (int port){
     
 	sfd = socket(PF_INET,SOCK_STREAM,0);
 	if (sfd == -1){
-        perror("socket fail");
+        perror("eroare socket.");
         return EXIT_SUCCESS;
 	}
-    /*SOL_SOCKET : To manipulate options at the sockets API level
-     *SO_REUSEADDR : Lorsqu'on doit redémarrer un serveur après un arrêt brutal cela peut servir
-     * à ne pas avoir une erreur lors de la création de la socket (la pile IP du système n'a pas
-     * toujours eu le temps de faire le ménage).
-     * Cas où plusieurs serveurs qui écoutent le même port ... (?)
+    	/*SOL_SOCKET : manevreaza optiunile de la nivelul API-ului socket-ului
+     *SO_REUSEADDR : pentru repornirea unui server in cazul unei opriri bruste
+     * pentru a nu avea erori la crearea socket-ului
+     * cazul in care sunt mai multe servere pe ac port
      */
     if(setsockopt(sfd, SOL_SOCKET, SO_REUSEADDR,&yes,sizeof(int)) == -1 ) {
-        perror("setsockopt erreur");
+        perror("Eroare setsocket.");
         exit(5);
     }
     
-    //preparation de l'adresse de la socket destination
+    //pregatirea adresei socket-ului de destinatie
 	l=sizeof(struct sockaddr_in);
 	bzero(&sock_serv,l);
 	
@@ -152,9 +136,9 @@ int create_server_socket (int port){
 	sock_serv.sin_port=htons(port);
 	sock_serv.sin_addr.s_addr=htonl(INADDR_ANY);
     
-	//Affecter une identité au socket
+	//alocarea unei identitati socket-ului
 	if(bind(sfd,(struct sockaddr*)&sock_serv,l)==-1){
-		perror("bind fail");
+		perror("Eroare bind");
 		return EXIT_FAILURE;
 	}
     
