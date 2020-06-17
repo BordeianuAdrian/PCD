@@ -8,6 +8,7 @@
  */
 
 #include <stdio.h>
+#include <Python.h>
 #include <stdlib.h>
 
 // Time function, sockets, htons... file stat
