@@ -1,5 +1,7 @@
 
 from PIL import Image
+import numpy
+import cv2
 import time
 
 name = ""
@@ -8,12 +10,10 @@ def rotate(nn = 30):
 	print(nn)
 	image = Image.open(name)
 	image.save(name)
-	image = image.rotate(nn, expand=True)
-	image = image.convert("L")
+	image = image.rotate(nn)
 	image.save("old_{}".format(name))
+	
 
-def say_hello(name):
-    print 'Hello {}!'.format(name)
 
 
 
