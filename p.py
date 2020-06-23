@@ -13,6 +13,28 @@ def rotate(nn = 30):
 	image = image.rotate(nn)
 	image.save("old_{}".format(name))
 	
+def bnw():
+	image = cv2.imread(name)
+	image = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
+        (thresh, image) = cv2.threshold(image, 127,255,cv2.THRESH_BINARY)
+	cv2.imwrite(name, image)
+
+def hsv():
+	image = cv2.imread(name)
+	image = cv2.cvtColor(image, cv2.COLOR_BGR2HSV)
+	cv2.imwrite(name, image)
+	
+def neg():
+	image = cv2.imread(name)
+	image = 255-image
+	cv2.imwrite(name, image)
+def highpass(sigma = 29):
+	image = cv2.imread(name)
+	
+	cv2.imwrite(name, image)
+def lowpass(sigma = 29):
+	
+	
 
 
 
