@@ -6,13 +6,13 @@ int createSocket()
     int fd = socket(AF_INET, SOCK_STREAM, 0);
     if (fd < 0)
     {
-        fprintf(stderr, "Error: %s\n", strerror(errno));
+        fprintf(stderr, "Eroare: %s\n", strerror(errno));
         exit(-1);
     }
     return fd;
 }
 
-//Binding
+//Legare
 void socketBinding(int fd, struct sockaddr_in *server, int portNumber)
 {
     memset(server, 0, sizeof(struct sockaddr_in));
@@ -21,17 +21,17 @@ void socketBinding(int fd, struct sockaddr_in *server, int portNumber)
     server->sin_addr.s_addr = htonl(INADDR_ANY);
     if ((bind(fd, (struct sockaddr *)server, sizeof(servAddr)) < 0))
     {
-        perror("Binding faild");
+        perror("Legare esuata");
         exit(-1);
     }
 }
-//get the host name of the client and returns the name
+//primirea numelui de host al clientului si returnarea acestuia
 char *getHostName(struct sockaddr_in *client, char *buffer)
 {
     hostEntry = gethostbyaddr(&(client->sin_addr), sizeof(struct in_addr), AF_INET);
     if (hostEntry == NULL)
     {
-        buffer = "Unkown Host";
+        buffer = "Host necunoscut";
     }
     else
     {
@@ -39,55 +39,55 @@ char *getHostName(struct sockaddr_in *client, char *buffer)
     }
     return buffer;
 }
-//Accept client connection
+//Acceptarea conexiunii cu clientul
 int acceptConnection(int fd, struct sockaddr_in *client)
 {
     int length = sizeof(struct sockaddr_in);
     fd = accept(fd, (struct sockaddr *)client, (socklen_t *)&length);
     if (fd < 0)
     {
-        fprintf(stderr, "Error: %s\n", strerror(errno));
+        fprintf(stderr, "Eroare: %s\n", strerror(errno));
         exit(-1);
     }
     return fd;
 }
 
-//print the information of the client once connected
+//printarea informatiilor clientului dupa conectare
 void printConnectionInfo(char *buffer)
 {
     buffer = getHostName(&clientAddr, buffer);
-    printf("Child %d: Client name is %s\n", getpid(), buffer);
-    printf("Child %d: Client IP address is %s\n", getpid(), inet_ntoa(clientAddr.sin_addr));
-    printf("Child %d: Accepted Connection from host %s\n", getpid(), getHostName(&clientAddr, buffer));
+    printf("Child %d: Numele clientului este %s\n", getpid(), buffer);
+    printf("Child %d: Adresa IP a client este %s\n", getpid(), inet_ntoa(clientAddr.sin_addr));
+    printf("Child %d: Acceptarea conexiunii de la host %s\n", getpid(), getHostName(&clientAddr, buffer));
 }
-//terminates child and sends Acknoledgement to client when done
+// oprirea copilului si trimiterea confirmatii catre client cand se termina
 void exitClient(int fd, char *buffer)
 {
     sendAcknowledgement(fd, buffer);
-    printf("Child %d: Quiting ...\n", getpid());
+    printf("Copil %d: Iesire ...\n", getpid());
     free(buffer);
     exit(-1);
 }
-//make a random portnumber for the data connection
+//construirea unui numar de port la intamplare pentru conexiunea de date
 int makePortNumber(int fd, struct sockaddr_in *dataAddr)
 {
     int length = sizeof(struct sockaddr_in);
     int status = getsockname(fd, (struct sockaddr *)dataAddr, (socklen_t *)&length);
     if (status < 0)
     {
-        fprintf(stderr, "getsockname faild %s\n", strerror(errno));
+        fprintf(stderr, "getsockname esuat %s\n", strerror(errno));
         return -1;
     }
-    return (ntohs(dataAddr->sin_port)); //used ntohs to make sure the port number is in the right order
+    return (ntohs(dataAddr->sin_port)); //utilizarea nthos pentru a fi siguri ca numarul de port este in ordinea corecta
 }
-//send an acknoledgement followed with the port number
+//trimiterea unui confirmari cu numarul portului
 void sendPortNumber(int fd, char *buffer, int portNumber)
 {
     buffer[0] = 'A';
     sprintf(buffer + 1, "%d\n", portNumber);
     writeNet(fd, buffer);
 }
-//change the server directory position
+//schimbarea pozitiei directorului din server
 void changeDir(int fd, char *pathname, char *buffer)
 {
     int status = chdir(pathname);
@@ -100,7 +100,7 @@ void changeDir(int fd, char *pathname, char *buffer)
         sendError(fd, buffer);
     }
 }
-//This function is called when the clients requests to get a file from the server
+//Aceasta functie este apelata cand clientul cere sa primeasca un fisier de la server.
 void sendFile(int client, int fd, char *buffer, char *pathname)
 {
     int filePointer = open(pathname, O_RDONLY, 0644);
@@ -115,7 +115,7 @@ void sendFile(int client, int fd, char *buffer, char *pathname)
     close(fd);
     close(filePointer);
 }
-//the function is called when the clients request to put a file to the server
+//Aceasta functie este apelata cand clientul cere sa puna un fisier pe server
 void getFile(int client, int fd, char *buffer, char *pathname)
 {
     int filePointer = open(pathname, O_WRONLY | O_TRUNC | O_EXCL | O_CREAT, 0644);
@@ -133,18 +133,18 @@ void getFile(int client, int fd, char *buffer, char *pathname)
 int main()
 {
     int dataSocketfd, datafd;
-    int listenfd = createSocket();                       //create a socket to connect to client
+    int listenfd = createSocket();                       //crearea unui socket pentru conexiunea la client
     socketBinding(listenfd, &servAdder, MY_PORT_NUMBER); //bind
 
     if (listen(listenfd, 4) == -1)
-    { //listen up to four connections
-        fprintf(stderr, "Error: %s\n", strerror(errno));
+    { //asculta pana la maxim 4 conexiuni
+        fprintf(stderr, "Eroare: %s\n", strerror(errno));
         return -1;
     }
 
     while (true)
     {
-        int connectfd = acceptConnection(listenfd, &clientAddr); //accept the connection we listened to
+        int connectfd = acceptConnection(listenfd, &clientAddr); //accepta conexiunea pe care o ascultam
         int n;
         if (fork())
         {
@@ -155,7 +155,7 @@ int main()
         {
             if (connectfd < 0)
             {
-                fprintf(stderr, "Error: %s\n", strerror(errno));
+                fprintf(stderr, "Eroare: %s\n", strerror(errno));
                 exit(-1);
             }
             else
@@ -173,7 +173,7 @@ int main()
                     n = readNet(connectfd, buffer);
                     if (n <= 0)
                     {
-                        fprintf(stderr, "Connection to client lost\n");
+                        fprintf(stderr, "Conexiunea cu clientul a fost pierduta\n");
                         free(buffer);
                         free(pathname);
                         exit(-1);
@@ -189,7 +189,7 @@ int main()
                         socketBinding(dataSocketfd, &servAdder, 0);
                         if (listen(dataSocketfd, 4) == -1)
                         {
-                            fprintf(stderr, "Error: %s\n", strerror(errno));
+                            fprintf(stderr, "Eroare: %s\n", strerror(errno));
                             return -1;
                         }
                         int portNumber = makePortNumber(dataSocketfd, &dataAddr);
