@@ -229,7 +229,7 @@ int main()
                     if (buffer[0] == 'X')
                     {
                         strcpy(pathname, buffer + 1);
-                        printf("ssss %s",pathname);
+                        printf("Comanda modificare imagine: %s",pathname);
 
                         enum { kMaxArgs = 64 };
                         int argc = 0;
@@ -253,7 +253,6 @@ int main()
                         Py_Finalize();
 
                         sendAcknowledgement(connectfd, buffer);
-                        printf("dddd");
                     }
                     if (buffer[0] == 'P')
                     {
