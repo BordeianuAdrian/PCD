@@ -3,6 +3,7 @@ from PIL import Image
 import numpy
 import cv2
 import time
+import sys
 
 name = ""
 def rotate(nn = 30):
@@ -29,17 +30,30 @@ def neg():
 	image = 255-image
 	cv2.imwrite(name, image)
 def highpass(sigma = 29):
+	sigma = int(sigma)
+	if(sigma%2):
+		image = cv2.imread(name)
+		image = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
+        	blur = cv2.GaussianBlur(image, (sigma,sigma),0)
+        	image = image - blur
+        	image = image + 127
+		cv2.imwrite(name, image)
+	else:
+		sys.exit(-1)
+		
+def lowpass(sigma = 29):
+	sigma = int(sigma)
+	if(sigma%2):
+		image = cv2.imread(name)
+		image = cv2.GaussianBlur(image, (sigma,sigma),0)
+		cv2.imwrite(name, image)
+	else:
+		sys.exit(-1)
 	image = cv2.imread(name)
 	
-	cv2.imwrite(name, image)
-def lowpass(sigma = 29):
-	
+	cv2.imwrite(name,image)
 	
 
-
-
-
-import sys
 
 print(sys.argv)
 print(sys.argv)
