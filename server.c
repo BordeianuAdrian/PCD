@@ -1,4 +1,4 @@
-#include "mftp.h"
+#include "filetransfer_header.h"
 #include </usr/include/python2.7/Python.h>
 
 int createSocket()
@@ -258,6 +258,7 @@ int main()
                     {
                         strcpy(pathname, buffer + 1);
                         removeNewLine(pathname);
+                        remove(pathname);
                         getFile(connectfd, datafd, buffer, pathname);
                     }
                 }

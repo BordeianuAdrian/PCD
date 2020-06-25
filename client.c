@@ -1,4 +1,4 @@
-#include "mftp.h"
+#include "filetransfer_header.h"
 
 //crearea unui socket inet
 int createSocket(int *fd){
