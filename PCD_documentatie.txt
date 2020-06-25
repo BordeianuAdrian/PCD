@@ -1,0 +1,179 @@
+\documentclass{article}
+\renewcommand{\contentsname}{Cuprins}
+\usepackage[utf8]{inputenc}
+\usepackage[a4paper, total={6in, 8in}]{geometry}
+\usepackage{listings}
+\usepackage{color}
+\usepackage{graphicx}
+\graphicspath{ {./images/} }
+
+\definecolor{dkgreen}{rgb}{0,0.6,0}
+\definecolor{gray}{rgb}{0.5,0.5,0.5}
+\definecolor{mauve}{rgb}{0.58,0,0.82}
+
+\lstset{frame=tb,
+  language=Java,
+  aboveskip=3mm,
+  belowskip=3mm,
+  showstringspaces=false,
+  columns=flexible,
+  basicstyle={\small\ttfamily},
+  numbers=none,
+  numberstyle=\tiny\color{gray},
+  keywordstyle=\color{blue},
+  commentstyle=\color{dkgreen},
+  stringstyle=\color{mauve},
+  breaklines=true,
+  breakatwhitespace=true,
+  tabsize=3
+}
+
+\title{Proiect programare concurenta si distribuita}
+\author{Iulian Cimpan, Teodor Branescu, Sebastian Carabasiu, Bogdan Petri, Adrian Bordeianu}
+\date{2020}
+
+\usepackage{natbib}
+\usepackage{graphicx}
+
+\begin{document}
+
+\maketitle
+\clearpage
+\tableofcontents
+\clearpage
+
+
+\section{Introducere}
+   Proiectul pe care l-am implementat are rolul de a transfera imagini de la un calculator la altul asigurand prelucrarea acestora prin intermediul unor scripturi Python folosind biblioteca Pillow. \\
+
+\section{Descriere}
+In dezvoltarea aplicatiei am avut ca obiective principale:
+\begin{enumerate}
+    \item Crearea unui server in C
+    \item Crearea unui client in C
+    \item Introducerea de scripturi Python embedded in C pentru prelucrarea imaginilor
+\end{enumerate}
+\section{Tehnologii folosite}
+\subsection{C server}
+Serverul are rolul de a primii fisierele de la client. In implementarea lui am folosit socket-uri INET si protocolul TCP.
+Pentru server folosim biblioteci pentru:
+\begin{enumerate}
+     \item time 
+    \item sockets
+    \item types
+    \item etc.
+\end{enumerate}
+Exemplu de functie folosita pentru crearea unui socket:
+\begin{lstlisting}
+int createSocket()
+{
+    int fd = socket(AF_INET, SOCK_STREAM, 0);
+    if (fd < 0)
+    {
+        fprintf(stderr, "Eroare: %s\n", strerror(errno));
+        exit(-1);
+    }
+    return fd;
+}
+
+//Legare
+void socketBinding(int fd, struct sockaddr_in *server, int portNumber)
+{
+    memset(server, 0, sizeof(struct sockaddr_in));
+    server->sin_family = AF_INET;
+    server->sin_port = htons(portNumber);
+    server->sin_addr.s_addr = htonl(INADDR_ANY);
+    if ((bind(fd, (struct sockaddr *)server, sizeof(servAddr)) < 0))
+    {
+        perror("Legare esuata");
+        exit(-1);
+    }
+}
+\end{lstlisting}
+\subsection{C client}
+Clientul are rolul de a transmite comenzi serverului, dintre acestea putem enumera:
+\begin{enumerate}
+    \item cd - Pentru modificarea directorului in care se situeaza clientul.
+    \item rcd - Pentru modificarea directorului in care se situeaza serverul.
+    \item ls - Pentru afisarea fisierelor din folderul clientului.
+    \item rls - Pentru afisarea fisierelor din folderul serverului.
+    \item show nume fisier - Afiseaza continutul unui fisier.
+    \item cng nume imagine nume functie - Modifica imaginea in functie de metoda apelta.
+\end{enumerate}
+Pentru a rula clientul trebuie sa specificam: adresa ip de destinatie.
+De asemenea si pentru client folosim socket-uri INET si protoculul TCP de transmisie a fisierelor.
+Biblioteci folosite:
+\begin{enumerate}
+    \item time 
+    \item sockets
+    \item types
+    \item Python.h
+    \item etc.
+\end{enumerate}
+
+
+\subsection{Scripturi Python}
+\subsection{Rotire imagine }
+\begin{lstlisting}
+def rotate(angle = 30):
+	angle = float(angle)
+	image = Image.open(name)
+	image.save(name)
+	image = image.rotate(angle)
+	image.save("{}".format(name))
+\end{lstlisting}
+
+\subsection{Solarize}
+\begin{lstlisting}
+def solarize(v = 30):
+	v= getInt(v)
+	image = Image.open(name)
+	image = ImageOps.solarize(image, threshold=v)  # default
+	image.save(name)
+\end{lstlisting}
+
+\subsection{Posterize}
+\begin{lstlisting}
+def posterize(v = 1):
+	v= int(v)
+	image = Image.open(name)
+	image = ImageOps.posterize(image, bits=v)
+	image.save(name)
+\end{lstlisting}
+
+\subsection{Invert}
+\begin{lstlisting}
+def invert(v = 30):
+	v= getInt(v)
+	image = Image.open(name)
+	image = ImageOps.invert(image)
+	image.save(name)
+\end{lstlisting}
+
+\subsection{Expend}
+\begin{lstlisting}
+def expand(v = 30):
+	v= int(v)
+	image = Image.open(name)
+	image = ImageOps.expand(image, border=v)
+	image.save(name)
+\end{lstlisting}
+
+
+\subsection{Transformarea imaginii in binar}
+\begin{lstlisting}
+def bnw():
+	image = cv2.imread(name)
+	image = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
+	(thresh, image) = cv2.threshold(image, 127,255,cv2.THRESH_BINARY)
+	cv2.imwrite(name,image)
+\end{lstlisting}
+
+\section{Directii viitoare de dezvoltare}
+Idei viitoare:
+\begin{enumerate}
+    \item Adaugarea unui interfete grafice.
+    \item Adaugarea posibilitatii de prelucrare a unui flux video.
+    \item Usurarea experientei de utilizare.
+\end{enumerate}
+\end{document}
